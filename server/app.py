@@ -320,6 +320,9 @@ def _score_action(case: dict, action: dict) -> dict:
     if action["line_number"] == 0:
         reward -= 0.5
 
+    # Clamp the reward to be strictly between 0.0 and 1.0
+    reward = max(0.0, min(1.0, float(reward)))
+
     return {
         "reward": round(reward, 4),
         "line_hit": action["line_number"] == bug_line,
@@ -729,9 +732,4 @@ def main(host: str = "0.0.0.0", port: int = 8000):
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=8000)
-    args = parser.parse_args()
-    main(port=args.port)
+    main()

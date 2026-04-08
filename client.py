@@ -11,7 +11,10 @@ from typing import Dict
 from openenv.core import EnvClient
 from openenv.core.client_types import StepResult
 
-from .models import ReviewAction, ReviewObservation, ReviewState
+try:
+    from .models import ReviewAction, ReviewObservation, ReviewState
+except ImportError:
+    from models import ReviewAction, ReviewObservation, ReviewState
 
 
 class CodeReviewEnv(EnvClient[ReviewAction, ReviewObservation, ReviewState]):

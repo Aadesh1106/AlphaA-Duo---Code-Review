@@ -89,7 +89,25 @@ class CodeReviewEnvironment(Environment):
         if seed is not None:
             random.seed(seed)
 
-        self.current_pr_index = forced_index if forced_index is not None else random.randrange(len(self.prs))
+        task = kwargs.get("task", "medium_security")  # Default to medium
+
+        # Filter PRs based on the task difficulty
+        if task == "easy_style":
+            # Find a PR that is "clean" (no bugs)
+            possible_indices = [i for i, pr in enumerate(self.prs) if self._normalize_pr(pr)[1]]
+        elif task == "hard_logic":
+            # Find a PR with a non-obvious logic bug
+            possible_indices = [i for i, pr in enumerate(self.prs) if pr.get("bug_category") == "logic_bug"]
+        else:  # medium_security (default)
+            # Find a PR with a clear security vulnerability
+            possible_indices = [i for i, pr in enumerate(self.prs) if pr.get("bug_category") != "logic_bug" and not self._normalize_pr(pr)[1]]
+
+        if not possible_indices:
+            # Fallback to any PR if no specific task match is found
+            possible_indices = list(range(len(self.prs)))
+
+        self.current_pr_index = forced_index if forced_index is not None else random.choice(possible_indices)
+
         self.done = False
         self.steps_taken = 0
         self.found_bug_indices = set()
@@ -264,6 +282,10 @@ class CodeReviewEnvironment(Environment):
         predicted_category = self._infer_predicted_category(action)
         self._update_class_stats(predicted_category, expected_category)
 
+        # Clamp the final reward to be strictly between 0.0 and 1.0
+        # We cap it at 1.0 and floor at 0.0 to ensure it falls strictly in the [0, 1] range.
+        normalized_reward = max(0.0, min(1.0, float(reward)))
+
         self.done = self.steps_taken >= self.max_actions or len(self.found_bug_indices) == len(self.current_bugs)
 
         if self.done and not is_clean:
@@ -280,9 +302,7 @@ class CodeReviewEnvironment(Environment):
                 "message": str(action.message),
                 "suggested_fix": str(action.suggested_fix),
                 "rationale": str(action.rationale),
-                "reward": round(float(reward), 4),
-                "predicted_category": predicted_category,
-                "expected_category": expected_category,
+                "reward": normalized_reward,
             }
         )
 
@@ -308,13 +328,13 @@ class CodeReviewEnvironment(Environment):
             "remaining_bugs": len(self.current_bugs) - len(self.found_bug_indices),
             "steps_taken": self.steps_taken,
             "max_actions": self.max_actions,
-            "reviewed_lines": sorted(self.reviewed_lines),
+            "reviewed_lines": sorted(list(self.reviewed_lines)),
             "session_history": self.session_history,
             "is_clean": is_clean,
             "class_metrics": self._class_metrics(),
             "current_pr_index": self.current_pr_index,
         }
-        return obs, reward, self.done, info
+        return obs, normalized_reward, self.done, info
 
     @property
     def state(self) -> ReviewState:
