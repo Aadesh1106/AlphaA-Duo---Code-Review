@@ -187,4 +187,3 @@ AlphaA-Duo---Code-Review/
 
 ---
 
-**Built by the AlphaA Duo team for the Meta PyTorch Hackathon 2024/25.**
