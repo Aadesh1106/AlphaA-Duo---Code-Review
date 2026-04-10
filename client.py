@@ -59,23 +59,24 @@ class CodeReviewEnv(EnvClient[ReviewAction, ReviewObservation, ReviewState]):
             "severity": action.severity,
             "message": action.message,
             "suggested_fix": action.suggested_fix,
+            "rationale": action.rationale,
         }
 
-    def _parse_result(self, payload: Dict) -> StepResult[ReviewObservation]:
+    def _parse_result(self, payload: dict) -> StepResult[ReviewObservation]:
         """
         Parse server response into StepResult[ReviewObservation].
-
-        Args:
-            payload: JSON response data from server
-
-        Returns:
-            StepResult with ReviewObservation
         """
         obs_data = payload.get("observation", {})
         observation = ReviewObservation(
             diff=obs_data.get("diff", ""),
             filename=obs_data.get("filename", ""),
             episode_id=obs_data.get("episode_id", -1),
+            file_context=obs_data.get("file_context", ""),
+            repo_summary=obs_data.get("repo_summary", ""),
+            total_bugs=obs_data.get("total_bugs", 0),
+            remaining_bugs=obs_data.get("remaining_bugs", 0),
+            is_clean=obs_data.get("is_clean", False),
+            bug_categories=obs_data.get("bug_categories", []),
         )
 
         return StepResult(
@@ -84,19 +85,19 @@ class CodeReviewEnv(EnvClient[ReviewAction, ReviewObservation, ReviewState]):
             done=payload.get("done", False),
         )
 
-    def _parse_state(self, payload: Dict) -> ReviewState:
+    def _parse_state(self, payload: dict) -> ReviewState:
         """
         Parse server response into ReviewState object.
-
-        Args:
-            payload: JSON response from state request
-
-        Returns:
-            ReviewState object with index and done flags
         """
         return ReviewState(
             current_pr_index=payload.get("current_pr_index", 0),
             done=payload.get("done", False),
+            steps_taken=payload.get("steps_taken", 0),
+            max_actions=payload.get("max_actions", 1),
+            found_bug_count=payload.get("found_bug_count", 0),
+            total_bug_count=payload.get("total_bug_count", 0),
+            reviewed_lines=payload.get("reviewed_lines", []),
+            session_history=payload.get("session_history", []),
         )
 
 
