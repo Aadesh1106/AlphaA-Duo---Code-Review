@@ -2,6 +2,8 @@
 
 An advanced OpenEnv-compliant reinforcement learning environment that transforms code reviews into a quantifiable challenge for AI agents.
 
+![CodeReview Dashboard](codereviewdashboard.jpg)
+
 
 ## Table of Contents
 
