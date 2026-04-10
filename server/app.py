@@ -377,7 +377,11 @@ def legacy_reset(payload: dict = Body(default={})) -> dict:
     sid = payload.get("session_id") if isinstance(payload, dict) else None
     sid = sid or _LEGACY_SESSION_ID
     sid, env = _get_or_create_web_env(sid)
-    obs = env.reset()
+    
+    # Pass all other payload items as kwargs to reset (e.g. task)
+    reset_kwargs = {k: v for k, v in payload.items() if k != "session_id"}
+    obs = env.reset(**reset_kwargs)
+    
     return {
         "session_id": sid,
         "observation": obs.model_dump(),
@@ -390,6 +394,9 @@ def legacy_reset(payload: dict = Body(default={})) -> dict:
 def legacy_step(payload: LegacyStepRequest) -> dict:
     sid = payload.session_id or _LEGACY_SESSION_ID
     sid, env = _get_or_create_web_env(sid)
+    
+    # In legacy step, we just pass the action. 
+    # Metadata/kwargs could be added if needed by the spec.
     obs, reward, done, info = env.step(payload.action)
     out = obs.model_dump()
     out["metadata"] = info
@@ -574,6 +581,11 @@ async function resetEnv() {
     document.getElementById('scoreLine').innerText = 'Reward: 0.0 | Done: false';
     document.getElementById('infoBox').innerText = 'Step info will appear here.';
     document.getElementById('statusPills').innerHTML = '<span class="pill ok">Episode Active</span>';
+    
+    // --- CLEAR FIELDS ---
+    document.getElementById('line_number').value = '0';
+    document.getElementById('message').value = '';
+    document.getElementById('suggested_fix').value = '';
 }
 
 async function submitStep() {
@@ -597,6 +609,11 @@ async function submitStep() {
     const data = await res.json();
     sessionId = data.session_id;
     renderStep(data);
+
+    // --- CLEAR FIELDS ---
+    document.getElementById('line_number').value = '0';
+    document.getElementById('message').value = '';
+    document.getElementById('suggested_fix').value = '';
 }
 </script>
 </body>
