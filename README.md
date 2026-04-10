@@ -2,7 +2,6 @@
 
 An advanced OpenEnv-compliant reinforcement learning environment that transforms code reviews into a quantifiable challenge for AI agents.
 
-![CodeReview-ENV Architecture](https://drive.google.com/file/d/1LS9UMHEvchDdgwmKlVuJx_1_2wMpJbq2/view?usp=drive_link)
 
 ## Table of Contents
 
