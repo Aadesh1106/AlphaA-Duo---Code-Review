@@ -133,7 +133,7 @@ python -m server.app
 cd AlphaA-Duo---Code-Review
 
 # Set credentials
-export HF_TOKEN="your_token"
+export HF_TOKEN="<YOUR_HUGGINGFACE_TOKEN>"
 export API_BASE_URL="https://router.huggingface.co/v1"
 
 # Run the agent
@@ -187,3 +187,4 @@ AlphaA-Duo---Code-Review/
 
 ---
 
+**Built by the AlphaA Duo team for the Meta PyTorch Hackathon 2024/25.**
