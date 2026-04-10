@@ -5,7 +5,7 @@ WORKDIR /app
 COPY server/requirements.txt /app/server/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r /app/server/requirements.txt && \
-    pip install --no-cache-dir openenv-core huggingface_hub pydantic
+    pip install --no-cache-dir openenv-core huggingface_hub pydantic openai
 
 COPY . /app
 COPY data /app/data
